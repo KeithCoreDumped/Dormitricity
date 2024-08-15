@@ -1,0 +1,5 @@
+requests
+matplotlib
+datetime
+scipy
+numpy
