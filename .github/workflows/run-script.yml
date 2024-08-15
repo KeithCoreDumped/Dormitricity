@@ -28,8 +28,8 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add log.csv
-        git commit -m "Update log.csv"
+        git add logs/*
+        git commit -m "Update logs"
         git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
