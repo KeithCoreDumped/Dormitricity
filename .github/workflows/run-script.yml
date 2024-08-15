@@ -19,7 +19,7 @@ jobs:
         python-version: '3.x'
 
     - name: Run log script
-      run: python log-script.py
+      run: python query.py ${{ secrets.QUERY_STR }}
 
     - name: Commit and push log
       run: |
