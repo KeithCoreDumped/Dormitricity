@@ -20,7 +20,7 @@ jobs:
 
     - name: Clone logs branch into logs directory
       run: |
-        git clone -b logs --single-branch ${{ github.repositoryUrl }} logs/
+        git clone -b logs --single-branch https://github.com/${{ github.repository }}.git logs/
   
     - name: Set up Python
       uses: actions/setup-python@v4
