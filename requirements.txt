@@ -4,5 +4,4 @@ datetime
 scipy
 numpy
 cryptography
-hmac
 urllib3
