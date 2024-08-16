@@ -35,9 +35,10 @@ jobs:
 
     - name: Commit and push log
       run: |
+        cd logs/
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add logs/*
+        git add .
         git commit -m "Update logs"
         git push
       env:
