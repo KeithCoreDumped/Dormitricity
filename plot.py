@@ -1,28 +1,25 @@
 import datetime as dt
-import numpy as np, csv, matplotlib.pyplot as plt
+import numpy as np, matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 import matplotlib.dates as mdates
+from storage import csv_storage
 
 # configs
 warning_timedelta = dt.timedelta(days=3)
 recent_timedelta = dt.timedelta(days=7)
 estimate_timedelta = dt.timedelta(days=1)
 
-# reads csv and returns history
-def read_csv():
-    history: list[tuple[float, dt.datetime, dt.datetime]] = []
 
-    with open(
-        "logs/d7fe8b41d5fd171c226357e7060d3b8b011e835d.csv", "rt", encoding="utf-8"
-    ) as f:
-        reader = csv.reader(f)
-        next(reader)
-        for rows in reader:
-            remain, query_time, request_time = [col.strip() for col in rows]
-            remain = float(remain)
-            query_time = dt.datetime.fromisoformat(query_time)
-            request_time = dt.datetime.fromisoformat(request_time)
-            history.append((remain, query_time, request_time))
+# reads csv and returns history
+def read_csv(cs: csv_storage):
+    history: list[tuple[float, dt.datetime, dt.datetime]] = []
+    for rows in filter(lambda x:x, cs.read().split("\n")):
+        rows = rows.split(",")
+        remain, query_time, request_time = [col.strip() for col in rows]
+        remain = float(remain)
+        query_time = dt.datetime.fromisoformat(query_time)
+        request_time = dt.datetime.fromisoformat(request_time)
+        history.append((remain, query_time, request_time))
 
     return history
 
@@ -143,7 +140,7 @@ def plot_history(
         plt.plot(
             dates,
             values,
-            marker="o",
+            # marker="o",
             linestyle="-",
             color="b",
             label="Remaining Amount",
@@ -273,8 +270,7 @@ def plot_watts(history_decharged: list[tuple[float, dt.datetime, dt.datetime]]):
     watts = diffs / [x.total_seconds() for x in widths] * 3.6e6
     plt.bar(timestamps, watts, width=widths, align="edge", color="skyblue")
 
-
-if __name__ == "__main__":
+def plot(cs: csv_storage):
     # history = [
     #     (10.0, dt.datetime(2024, 8, 8, 0, 0, 0), dt.datetime(2024, 8, 8, 23, 59, 59)),
     #     (8.0, dt.datetime(2024, 8, 9, 0, 0, 0), dt.datetime(2024, 8, 9, 23, 59, 59)),
@@ -286,7 +282,7 @@ if __name__ == "__main__":
     #     (16, dt.datetime(2024, 8, 15, 0, 0, 0), dt.datetime(2024, 8, 13, 23, 59, 59)),
     #     (11, dt.datetime(2024, 8, 16, 0, 0, 0), dt.datetime(2024, 8, 13, 23, 59, 59)),
     # ]
-    history = read_csv()
+    history = read_csv(cs)
     history = filter_recent(history)
     decharged, recharges = decharge(history)
     costs = get_cost(decharged)
@@ -307,7 +303,7 @@ if __name__ == "__main__":
     # plt.legend()
 
     # plt.show() # we don't have a display to show the plot in github actions
-    plt.savefig("images/recent.png", format="png")
+    plt.savefig(f"{cs.filepath}/recent.png", format="png")
 
     # plot watts
     plt.figure(2, figsize=(10, 6))
@@ -319,4 +315,4 @@ if __name__ == "__main__":
     # auto format x-axis date
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M"))
     plt.gcf().autofmt_xdate()
-    plt.savefig("images/watts.png", format="png")
+    plt.savefig(f"{cs.filepath}/watts.png", format="png")

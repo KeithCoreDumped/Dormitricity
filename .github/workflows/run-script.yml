@@ -2,7 +2,7 @@ name: Run Log Script
 
 on:
   schedule:
-    - cron: '*/10 * * * *' # Runs every 10 mins
+    - cron: '*/10 1-23 * * *' # Runs every 10 mins
   workflow_dispatch: # Allows manual trigger from GitHub UI
 
 jobs:
@@ -12,7 +12,16 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        ref: master
+      
+    - name: Create and move to logs directory
+      run: mkdir logs
 
+    - name: Clone logs branch into logs directory
+      run: |
+        git clone -b logs --single-branch ${{ github.repositoryUrl }} logs/
+  
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
@@ -22,7 +31,7 @@ jobs:
       run: pip install -r requirements.txt
 
     - name: Run log script
-      run: python query.py ${{ secrets.QUERY_STR }}
+      run: python query.py "${{ secrets.QUERY_STR }}" "${{ secrets.PASSPHRASE }}" "${{ secrets.COOKIES }}"
 
     - name: Commit and push log
       run: |

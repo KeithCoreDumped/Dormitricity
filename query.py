@@ -1,9 +1,8 @@
 import requests, os, json, sys
 from datetime import datetime, timedelta
-from config import cookies, json_or_exit
-from pathlib import Path
-import hashlib
 from storage import csv_storage
+import plot
+from urllib.parse import parse_qs
 
 
 class bad_query(Exception):
@@ -31,7 +30,17 @@ class verbose_dict(dict):
             )
 
 
-def do_query(query_str: str, passphrase: str):
+def json_or_exit(res):
+    try:
+        return res.json()
+    except Exception as e:
+        print(f"error fetching json: {e}")
+        print(f"url: {res.url}")
+        print(f"responce: {res.content}")
+        exit(1)
+
+
+def do_query(query_str: str, passphrase: str, cookies: dict):
     # check if such room exists
     query_name = query_str.split("@")
     if len(query_name) != 2:
@@ -77,19 +86,20 @@ def do_query(query_str: str, passphrase: str):
     cs.append(f"{remain}, {time}, {datetime.now()}\n")
 
     print(f"successfully saved to {cs.filename}")
+    plot.plot(cs)
 
 
 def show_help_exit():
-    print("usage: query.py <query_str>[,query_str2,...] <passphrase>")
+    print("usage: query.py <query_str>[,query_str2,...] <passphrase> <cookies>")
     print(
-        "example: query.py 西土城.学五楼.3.5-312-节能蓝天@学五-312宿舍,沙河.沙河校区雁北园A楼.1层.A楼102@沙河A102宿舍 example_passphrase"
+        "example: query.py 西土城.学五楼.3.5-312-节能蓝天@学五-312宿舍,沙河.沙河校区雁北园A楼.1层.A楼102@沙河A102宿舍 example_passphrase UUkey=xxx&eai-sess=yyy"
     )
     exit(1)
 
 
 # main logic
 
-if len(sys.argv) != 3:
+if len(sys.argv) != 4:
     print("invalid arguments.")
     show_help_exit()
 
@@ -101,5 +111,7 @@ print(f" done")
 
 passphrase = sys.argv[2]
 
+cookies = {k: v[0] for k, v in parse_qs(sys.argv[3]).items()}
+
 for qs in sys.argv[1].split(","):
-    do_query(qs, passphrase)
+    do_query(qs, passphrase, cookies)

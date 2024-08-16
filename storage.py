@@ -1,4 +1,4 @@
-import os, base64, hashlib, bcrypt, hmac
+import os, hashlib, hmac
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives import hashes, padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
