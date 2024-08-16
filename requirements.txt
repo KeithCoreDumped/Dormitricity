@@ -3,3 +3,4 @@ matplotlib
 datetime
 scipy
 numpy
+cryptography

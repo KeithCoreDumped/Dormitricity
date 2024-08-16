@@ -6,13 +6,15 @@ import matplotlib.dates as mdates
 # configs
 warning_timedelta = dt.timedelta(days=3)
 recent_timedelta = dt.timedelta(days=7)
-
+estimate_timedelta = dt.timedelta(days=1)
 
 # reads csv and returns history
 def read_csv():
     history: list[tuple[float, dt.datetime, dt.datetime]] = []
 
-    with open("history.csv", "rt", encoding="utf-8") as f:
+    with open(
+        "logs/d7fe8b41d5fd171c226357e7060d3b8b011e835d.csv", "rt", encoding="utf-8"
+    ) as f:
         reader = csv.reader(f)
         next(reader)
         for rows in reader:
@@ -197,12 +199,15 @@ def plot_exhaustion(
     history_decharged: list[tuple[float, dt.datetime, dt.datetime]],
     history_last: tuple[float, dt.datetime, dt.datetime],
 ):
-    # 取最后5次采样的数据
-    last5 = history_decharged[-5:]
+    tlast = history_last[1]
+    for i, (v, tq, tr) in enumerate(history_decharged):
+        if tlast - tq < estimate_timedelta:
+            break
+    history_decharged = history_decharged[i:]
 
     # 分离出电量值和时间戳
-    values = np.array([item[0] for item in last5])
-    timestamps = np.array([item[1].timestamp() for item in last5])
+    values = np.array([item[0] for item in history_decharged])
+    timestamps = np.array([item[1].timestamp() for item in history_decharged])
 
     # linear fit
     slope, intercept = np.polyfit(timestamps, values, 1)  # k, b
@@ -215,7 +220,6 @@ def plot_exhaustion(
 
     # y=kx+b
     # y=0 => kx=-b => x=-b/k
-    # 使用拟合模型预测电量为0时的时间戳
     exhaustion_x = -intercept / slope
     exhaustion_y = 0.0
 
@@ -267,7 +271,7 @@ def plot_watts(history_decharged: list[tuple[float, dt.datetime, dt.datetime]]):
     values = np.array([x[0] for x in history_decharged])
     diffs = values[:-1] - values[1:]
     watts = diffs / [x.total_seconds() for x in widths] * 3.6e6
-    plt.bar(timestamps, watts, width=widths, align='edge', color='skyblue')
+    plt.bar(timestamps, watts, width=widths, align="edge", color="skyblue")
 
 
 if __name__ == "__main__":

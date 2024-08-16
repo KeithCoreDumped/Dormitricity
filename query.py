@@ -3,10 +3,13 @@ from datetime import datetime, timedelta
 from config import cookies, json_or_exit
 from pathlib import Path
 import hashlib
+from storage import csv_storage
+
 
 class bad_query(Exception):
     # subclass but acts exactly as the base class
     pass
+
 
 class verbose_dict(dict):
     def __getitem__(self, key):
@@ -27,7 +30,8 @@ class verbose_dict(dict):
                 f"attribute '{key}' not found. available: {sorted(available_keys)}"
             )
 
-def do_query(query_str:str):
+
+def do_query(query_str: str, passphrase: str):
     # check if such room exists
     query_name = query_str.split("@")
     if len(query_name) != 2:
@@ -65,33 +69,27 @@ def do_query(query_str:str):
     res: dict = json_or_exit(responce)
 
     data = res["d"]["data"]
-    remain = data["surplus"] + data["freeEnd"] # 剩余电量 + 剩余赠送电量
+    remain = data["surplus"] + data["freeEnd"]  # 剩余电量 + 剩余赠送电量
     time = datetime.fromisoformat(data["time"])
 
-    # encode filename
-    hashobj = hashlib.sha1()
-    hashobj.update(room_name.encode())
-    history_file = f"logs/{hashobj.hexdigest()}.csv"
-
-    # write first row of csv
-    if not os.path.exists(history_file):
-        with open(history_file, "wt", encoding="utf-8") as f:
-            f.write("remain, query time, request time\n")
-
     # append query result to csv
-    with open(history_file, "at", encoding="utf-8") as f:
-        f.write(f"{remain}, {time}, {datetime.now()}\n")
+    cs = csv_storage(room_name, passphrase)
+    cs.append(f"{remain}, {time}, {datetime.now()}\n")
 
-    print(f"successfully saved to {history_file}")
+    print(f"successfully saved to {cs.filename}")
 
 
 def show_help_exit():
-    print("usage: query.py <query_str>[,<query_str2>]")
-    print("example: query.py 西土城.学五楼.3.5-312-节能蓝天@学五-312宿舍,沙河.沙河校区雁北园A楼.1层.A楼102@沙河A102宿舍")
+    print("usage: query.py <query_str>[,query_str2,...] <passphrase>")
+    print(
+        "example: query.py 西土城.学五楼.3.5-312-节能蓝天@学五-312宿舍,沙河.沙河校区雁北园A楼.1层.A楼102@沙河A102宿舍 example_passphrase"
+    )
     exit(1)
+
+
 # main logic
 
-if len(sys.argv) != 2:
+if len(sys.argv) != 3:
     print("invalid arguments.")
     show_help_exit()
 
@@ -101,5 +99,7 @@ with open("dormitory_info.json", "rt", encoding="utf-8") as f:
     dormitory_info: dict = verbose_dict(json.load(f))
 print(f" done")
 
-for qs in sys.argv[1].split(','):
-    do_query(qs)
+passphrase = sys.argv[2]
+
+for qs in sys.argv[1].split(","):
+    do_query(qs, passphrase)
