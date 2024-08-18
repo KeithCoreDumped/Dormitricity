@@ -180,9 +180,9 @@ def plot_history(
     begin_idx = 0
 
     plot_recharge(extended_history)
-
-    for [i] in (
-        np.where(diff < 0) if recharges else []
+    
+    for i in (
+        np.where(diff < 0)[0] if recharges else []
     ):  # np.where returns [[]] when condition is never satisfied, and [i] fails
         i += 1  # offset 1 from differentiation
         plot_segment(extended_history[begin_idx:i])
