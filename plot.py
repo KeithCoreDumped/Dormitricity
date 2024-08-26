@@ -304,6 +304,8 @@ def plot(cs: csv_storage):
 
     # plt.show() # we don't have a display to show the plot in github actions
     plt.savefig(f"{cs.filepath}/recent.png", format="png")
+    # delete figure
+    plt.clf()
 
     # plot watts
     plt.figure(2, figsize=(10, 6))
@@ -316,3 +318,5 @@ def plot(cs: csv_storage):
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M"))
     plt.gcf().autofmt_xdate()
     plt.savefig(f"{cs.filepath}/watts.png", format="png")
+    # delete figure
+    plt.clf()
