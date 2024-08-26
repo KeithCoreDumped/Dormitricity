@@ -316,3 +316,6 @@ def plot(cs: csv_storage):
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M"))
     plt.gcf().autofmt_xdate()
     plt.savefig(f"{cs.filepath}/watts.png", format="png")
+
+    # delete figures
+    plt.clf()
