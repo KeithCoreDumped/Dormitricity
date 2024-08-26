@@ -1,0 +1,7 @@
+requests
+matplotlib
+datetime
+scipy
+numpy
+cryptography
+urllib3

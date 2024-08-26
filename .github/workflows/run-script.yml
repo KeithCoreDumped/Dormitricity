@@ -1,0 +1,56 @@
+name: Run Log Script
+
+on:
+  schedule:
+    - cron: '*/10 1-15,17-23 * * *' # Runs every 10 mins
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        ref: master
+      
+    - name: Set Timezone to UTC+8
+      uses: szenius/set-timezone@v1.0
+      with:
+        timezoneLinux: "Asia/Shanghai"
+      
+    - name: Create and move to logs directory
+      run: mkdir logs
+
+    # - name: Clone logs branch into logs directory
+    #   run: |
+    #     git clone -b logs --single-branch https://github.com/${{ github.repository }}.git logs/
+  
+    - name: Checkout logs repository
+      uses: actions/checkout@v3
+      with:
+        ref: logs
+        path: logs
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Run log script
+      run: python query.py "${{ secrets.QUERY_STR }}" "${{ secrets.PASSPHRASE }}" "${{ secrets.COOKIES }}"
+
+    - name: Commit and push log
+      run: |
+        cd logs/
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "Update logs"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
