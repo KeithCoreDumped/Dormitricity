@@ -58,9 +58,11 @@ def decharge(history: list[tuple[float, dt.datetime, dt.datetime]]):
             # recharge occurs
             delta = value - last_value
             recharged = find_smallest_greater(recharge_values, delta)
-            assert (
-                recharged
-            ), "amount of recharge more than the maximum value of 200 within sample interval"
+            if not recharged:
+                recharged = delta
+            #assert (
+            #    recharged
+            #), "amount of recharge more than the maximum value of 200 within sample interval"
             # todo: handle cases when the amount is less than a minimum of 25
             recharged_sum += recharged
             recharges.append((recharged, i))
@@ -221,8 +223,9 @@ def plot_exhaustion(
     exhaustion_y = 0.0
 
     ts_overflow = dt.datetime(3000, 1, 1, 0, 0, 0).timestamp() # 32503651200.0
-    if exhaustion_x > ts_overflow:
+    if slope == 0.0 or abs(exhaustion_x) > ts_overflow:
         print("low electricity usage")
+        return None
         exhaustion_x = history_last[1] + warning_timedelta
         exhaustion_y = slope * exhaustion_x.timestamp() + intercept
         plt.text(
