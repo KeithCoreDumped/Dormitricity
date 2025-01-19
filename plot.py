@@ -221,7 +221,7 @@ def plot_exhaustion(
     exhaustion_y = 0.0
 
     ts_overflow = dt.datetime(3000, 1, 1, 0, 0, 0).timestamp() # 32503651200.0
-    if exhaustion_x > ts_overflow:
+    if abs(exhaustion_x) > ts_overflow:
         print("low electricity usage")
         exhaustion_x = history_last[1] + warning_timedelta
         exhaustion_y = slope * exhaustion_x.timestamp() + intercept
