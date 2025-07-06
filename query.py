@@ -14,6 +14,7 @@ mail_config = {
     "sender": "",
     "receivers": [""],
     "mail_notify": False,  # whether to send email notification
+    "force_notify": False,  # whether to send email notification even if not low power
 }
 
 
@@ -102,10 +103,10 @@ def do_query(query_str: str, q_passphrase: str, q_cookies: dict):
     print(f"successfully saved to {cs.filename}")
     plot.plot(cs)
 
-    if remain < 5 and mail_config["mail_notify"]:
+    if (remain < 5 and mail_config["mail_notify"]) or mail_config["force_notify"]:
         notify.mail_notification(
             mail_config=mail_config,
-            subject=f"宿舍电量低于5度: {room_name}",
+            subject=f"宿舍电量预警: {room_name}",
             body=f"当前电量: {remain}度\n时间: {time}" + "<img src='{img0}'><img src='{img1}'>",
             image_paths=[f"{cs.filepath}/recent.png", f"{cs.filepath}/watts.png"],
         )
@@ -113,7 +114,7 @@ def do_query(query_str: str, q_passphrase: str, q_cookies: dict):
 
 def show_help_exit():
     print("usage: query.py <query_str>[,query_str2,...] <passphrase> <cookies> "
-          "[<mail_address> <mail_pass>]")
+          "[<mail_address> <mail_pass> <force_notify>]")
     print(
         "example: query.py 西土城.学五楼.3.5-312-节能蓝天@学五-312宿舍,沙河.沙河校区雁北园A楼.1层.A楼102@沙河A102宿舍 " \
         "example_passphrase UUkey=xxx&eai-sess=yyy"
@@ -143,6 +144,9 @@ mail_config["sender"] = mail_config["mail_user"]
 mail_config["receivers"] = [mail_config["mail_user"]] if mail_config["mail_user"] else []
 if mail_config["mail_user"] and mail_config["mail_pass"]:
     mail_config["mail_notify"] = True
+if len(sys.argv) > 6:
+    mail_config["force_notify"] = sys.argv[6].lower() in ("true", "1", "yes")
+
 
 for qs in sys.argv[1].split(","):
     do_query(qs, passphrase, cookies)
