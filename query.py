@@ -104,6 +104,7 @@ def do_query(query_str: str, q_passphrase: str, q_cookies: dict):
     plot.plot(cs)
 
     if (remain < 5 and mail_config["mail_notify"]) or mail_config["force_notify"]:
+        mail_config["receivers"] = receiver_dict.get(room_name, [mail_config["sender"]])
         notify.mail_notification(
             mail_config=mail_config,
             subject=f"宿舍电量预警: {room_name}",
@@ -141,11 +142,19 @@ cookies = {k: v[0] for k, v in parse_qs(sys.argv[3]).items()}
 mail_config["mail_user"] = sys.argv[4] if len(sys.argv) > 4 else ""
 mail_config["mail_pass"] = sys.argv[5] if len(sys.argv) > 5 else ""
 mail_config["sender"] = mail_config["mail_user"]
-mail_config["receivers"] = [mail_config["mail_user"]] if mail_config["mail_user"] else []
 if mail_config["mail_user"] and mail_config["mail_pass"]:
     mail_config["mail_notify"] = True
 if len(sys.argv) > 6:
     mail_config["force_notify"] = sys.argv[6].lower() in ("true", "1", "yes")
+
+receiver_dict = {}
+if len(sys.argv) > 7:
+    # room_name1,mail1&mail2;room_name2,mail1&mail2
+    receiver_list = sys.argv[7].split(";")
+    for name_and_mails in receiver_list:
+        name, mails = name_and_mails.split(",", 1)
+        mails = mails.split("&")
+        receiver_dict[name] = mails
 
 
 for qs in sys.argv[1].split(","):
