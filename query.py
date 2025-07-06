@@ -1,14 +1,14 @@
-import requests, os, json, sys
-from datetime import datetime, timedelta
+import json, sys
+from datetime import datetime
+from urllib.parse import parse_qs
+import requests
 from storage import csv_storage
 import plot
-from urllib.parse import parse_qs
 
 
 class bad_query(Exception):
     # subclass but acts exactly as the base class
     pass
-
 
 class verbose_dict(dict):
     def __getitem__(self, key):
@@ -17,7 +17,7 @@ class verbose_dict(dict):
             if isinstance(res, dict) and not isinstance(res, verbose_dict):
                 return verbose_dict(res)
             return res
-        except KeyError:
+        except KeyError as exc:
             available_keys: list[str] = list(self.keys())
             available_keys = list(  # filter out reserved keys
                 filter(
@@ -27,20 +27,19 @@ class verbose_dict(dict):
             )
             raise bad_query(
                 f"attribute '{key}' not found. available: {sorted(available_keys)}"
-            )
-
+            ) from exc
 
 def json_or_exit(res):
     try:
         return res.json()
-    except Exception as e:
+    except ValueError as e:
         print(f"error fetching json: {e}")
         print(f"url: {res.url}")
         print(f"responce: {res.content}")
         exit(1)
 
 
-def do_query(query_str: str, passphrase: str, cookies: dict):
+def do_query(query_str: str, q_passphrase: str, q_cookies: dict):
     # check if such room exists
     query_name = query_str.split("@")
     if len(query_name) != 2:
@@ -62,8 +61,8 @@ def do_query(query_str: str, passphrase: str, cookies: dict):
         exit(1)
 
     # query the api
-    print(f"querying ...", end="", flush=True)
-    responce = requests.post(
+    print("querying ...", end="", flush=True)
+    response = requests.post(
         "https://app.bupt.edu.cn/buptdf/wap/default/search",
         data={
             "partmentId": dormitory_info[campus][partment]["id"],
@@ -71,18 +70,19 @@ def do_query(query_str: str, passphrase: str, cookies: dict):
             "dromNumber": room_id,
             "areaid": str(int(campus != "西土城") + 1),
         },
-        cookies=cookies,
+        cookies=q_cookies,
+        timeout=10,
     )
-    print(f" done")
+    print(" done")
 
-    res: dict = json_or_exit(responce)
+    res: dict = json_or_exit(response)
 
     data = res["d"]["data"]
     remain = data["surplus"] + data["freeEnd"]  # 剩余电量 + 剩余赠送电量
     time = datetime.fromisoformat(data["time"])
 
     # append query result to csv
-    cs = csv_storage(room_name, passphrase)
+    cs = csv_storage(room_name, q_passphrase)
     cs.append(f"{remain}, {time}, {datetime.now()}\n")
 
     print(f"successfully saved to {cs.filename}")
@@ -92,9 +92,10 @@ def do_query(query_str: str, passphrase: str, cookies: dict):
 def show_help_exit():
     print("usage: query.py <query_str>[,query_str2,...] <passphrase> <cookies>")
     print(
-        "example: query.py 西土城.学五楼.3.5-312-节能蓝天@学五-312宿舍,沙河.沙河校区雁北园A楼.1层.A楼102@沙河A102宿舍 example_passphrase UUkey=xxx&eai-sess=yyy"
+        "example: query.py 西土城.学五楼.3.5-312-节能蓝天@学五-312宿舍,沙河.沙河校区雁北园A楼.1层.A楼102@沙河A102宿舍 " \
+        "example_passphrase UUkey=xxx&eai-sess=yyy"
     )
-    exit(1)
+    sys.exit(1)
 
 
 # main logic
@@ -104,10 +105,10 @@ if len(sys.argv) != 4:
     show_help_exit()
 
 # load dormitory info
-print(f"loading dormitory info ...", end="", flush=True)
+print("loading dormitory info ...", end="", flush=True)
 with open("dormitory_info.json", "rt", encoding="utf-8") as f:
     dormitory_info: dict = verbose_dict(json.load(f))
-print(f" done")
+print(" done")
 
 passphrase = sys.argv[2]
 

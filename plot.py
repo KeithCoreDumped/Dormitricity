@@ -303,7 +303,7 @@ def plot(cs: csv_storage):
     history = read_csv(cs)
     history = filter_recent(history)
     decharged, recharges = decharge(history)
-    costs = get_cost(decharged)
+    get_cost(decharged)
 
     plt.figure(1, figsize=(10, 6))
     exhaust_time = plot_exhaustion(decharged, history[-1])
