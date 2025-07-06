@@ -42,7 +42,7 @@ jobs:
       run: pip install -r requirements.txt
 
     - name: Run log script
-      run: python query.py "${{ secrets.QUERY_STR }}" "${{ secrets.PASSPHRASE }}" "${{ secrets.COOKIES }}"
+      run: python query.py "${{ secrets.QUERY_STR }}" "${{ secrets.PASSPHRASE }}" "${{ secrets.COOKIES }}" "${{ secrets.MAIL_ADDRESS }}" "${{ secrets.MAIL_PASS }}"
 
     - name: Commit and push log
       run: |
