@@ -51,6 +51,6 @@ jobs:
         git config --local user.name "GitHub Action"
         git add .
         git commit -m "Update logs" --amend
-        git push
+        git push -f
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
