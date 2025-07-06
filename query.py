@@ -106,7 +106,7 @@ def do_query(query_str: str, q_passphrase: str, q_cookies: dict):
         notify.mail_notification(
             mail_config=mail_config,
             subject=f"宿舍电量低于5度: {room_name}",
-            body=f"当前电量: {remain}度\n时间: {time}",
+            body=f"当前电量: {remain}度\n时间: {time}" + "<img src='{img0}'><img src='{img1}'>",
             image_paths=[f"{cs.filepath}/recent.png", f"{cs.filepath}/watts.png"],
         )
 
