@@ -124,7 +124,7 @@ def show_help_exit():
 
 # main logic
 
-if len(sys.argv) != 4:
+if len(sys.argv) <= 4:
     print("invalid arguments.")
     show_help_exit()
 
