@@ -163,6 +163,10 @@ if args.receivers:
         name, mails = name_and_mails.split(",", 1)
         mails = mails.split("&")
         receiver_dict[name] = mails
+    print("receiver configuration:")
+    for room_name, mails in receiver_dict.items():
+        print(f"  {room_name}: {', '.join(mails)}")
+
 
 for qs in args.query.split(","):
     do_query(qs, passphrase, cookies)
