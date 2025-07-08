@@ -149,9 +149,11 @@ mail_config["mail_user"] = args.mail.split("&")[0] if args.mail else ""
 mail_config["mail_pass"] = args.mail.split("&")[1] if args.mail else ""
 mail_config["mail_host"] = args.mail.split("&")[2] if args.mail else ""
 mail_config["sender"] = mail_config["mail_user"]
-if mail_config["mail_user"] and mail_config["mail_pass"]:
-    mail_config["mail_notify"] = True
+mail_config["mail_notify"] = True if args.mail else False
 mail_config["force_notify"] = args.mail.split("&")[3] in ["1", "true", "yes"] if args.mail else False
+
+print("mail configuration:"
+      f"\n  user: {mail_config['mail_user']}\n  host: {mail_config['mail_host']}\n  notify: {mail_config['mail_notify']}\n  force notify: {mail_config['force_notify']}")
 
 receiver_dict = {}
 if args.receivers:
