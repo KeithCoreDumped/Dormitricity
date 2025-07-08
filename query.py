@@ -111,11 +111,8 @@ def do_query(query_str: str, q_passphrase: str, q_cookies: dict):
             body=f"当前电量: {remain}度\n时间: {time}" + "<img src='{img0}'><img src='{img1}'>",
             image_paths=[f"{cs.filepath}/recent.png", f"{cs.filepath}/watts.png"],
         )
-        if ret:
-            print(f"notification sent to {', '.join(mail_config['receivers'])}")
-        else:
-            raise RuntimeError(
-                f"failed to send notification to {', '.join(mail_config['receivers'])}")
+        if ret == False:
+            raise RuntimeError("failed to send notification")
 
 def show_help_exit():
     print("usage: dormitricity query -q 'campus.partment.floor.room@room_name' -p passphrase -c cookies [-m mail_address&mail_pass&smtp_host&force_notify] [-r room_name,mail1&mail2;room_name2,mail1&mail2]")
@@ -157,9 +154,6 @@ mail_config["sender"] = mail_config["mail_user"]
 mail_config["mail_notify"] = True if args.mail else False
 mail_config["force_notify"] = args.mail.split("&")[3] in ["1", "true", "yes"] if args.mail else False
 
-print("mail configuration:"
-      f"\n  user: {mail_config['mail_user']}\n  host: {mail_config['mail_host']}\n  notify: {mail_config['mail_notify']}\n  force notify: {mail_config['force_notify']}")
-
 receiver_dict = {}
 if args.receivers:
     # room_name1,mail1&mail2;room_name2,mail1&mail2
@@ -168,9 +162,6 @@ if args.receivers:
         name, mails = name_and_mails.split(",", 1)
         mails = mails.split("&")
         receiver_dict[name] = mails
-    print("receiver configuration:")
-    for room_name, mails in receiver_dict.items():
-        print(f"  {room_name}: {', '.join(mails)}")
 
 
 for qs in args.query.split(","):
