@@ -104,6 +104,7 @@ def do_query(query_str: str, q_passphrase: str, q_cookies: dict):
     exhaust_time = plot.plot(cs)
     time_diff = datetime.now() - exhaust_time
     print(f"exhaust time: {exhaust_time} ({time_diff.days} days, {time_diff.seconds // 3600} hours, {(time_diff.seconds // 60) % 60} minutes)")
+    print(f"total seconds: {time_diff.total_seconds()}")
 
     if ((remain < 5 and mail_config["mail_notify"]) or mail_config["force_notify"]):
         mail_config["receivers"] = receiver_dict.get(room_name, [mail_config["sender"]])
