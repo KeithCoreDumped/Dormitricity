@@ -154,6 +154,7 @@ mail_config["mail_host"] = args.mail.split("&")[2] if args.mail else ""
 mail_config["sender"] = mail_config["mail_user"]
 mail_config["mail_notify"] = True if args.mail else False
 mail_config["force_notify"] = args.mail.split("&")[3] in ["1", "true", "yes"] if args.mail else False
+print(f" FORCED NOTIFY: {mail_config['force_notify']}")
 
 receiver_dict = {}
 if args.receivers:
