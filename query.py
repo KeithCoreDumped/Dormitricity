@@ -1,4 +1,4 @@
-import json, sys
+import json, sys, argparse
 from datetime import datetime
 from urllib.parse import parse_qs
 import requests
@@ -112,22 +112,27 @@ def do_query(query_str: str, q_passphrase: str, q_cookies: dict):
             image_paths=[f"{cs.filepath}/recent.png", f"{cs.filepath}/watts.png"],
         )
 
-
 def show_help_exit():
-    print("usage: query.py <query_str>[,query_str2,...] <passphrase> <cookies> "
-          "[<mail_address> <mail_pass> <force_notify>]")
-    print(
-        "example: query.py 西土城.学五楼.3.5-312-节能蓝天@学五-312宿舍,沙河.沙河校区雁北园A楼.1层.A楼102@沙河A102宿舍 " \
-        "example_passphrase UUkey=xxx&eai-sess=yyy"
-    )
-    sys.exit(1)
-
+    print("usage: dormitricity query -q 'campus.partment.floor.room@room_name' -p passphrase -c cookies [-m mail_address&mail_pass&smtp_host&force_notify] [-r room_name,mail1&mail2;room_name2,mail1&mail2]")
+    print("example: dormitricity query -q '西土城.东区.1.101@101' -p 'your_passphrase' -c 'UUKey=value1&eai-sess=value2' -m 'mail_address&mail_pass&smtp_host&1' -r '101,mail1&mail2;102,mail3'")
+    exit(0)
 
 # main logic
 
-if len(sys.argv) <= 4:
-    print("invalid arguments.")
-    show_help_exit()
+parser = argparse.ArgumentParser(description="Dormitricity Query Tool")
+parser.add_argument("-q", "--query", type=str, required=True,
+                    help="Query string in the format 'campus.partment.floor.room@room_name'")
+parser.add_argument("-p", "--passphrase", type=str, required=True,
+                    help="Passphrase for the query")
+parser.add_argument("-c", "--cookies", type=str, required=True,
+                    help="Cookies in URL-encoded format, e.g., 'UUKey=value1&eai-sess=value2'")
+parser.add_argument("-m", "--mail", type=str, nargs='?', default="",
+                    help="Email address for notifications, " \
+                    "e.g., 'mail_address&mail_pass&smtp_host&force_notify', (optional)")
+parser.add_argument("-r", "--receivers", type=str, nargs='?', default="",
+                    help="Custom receivers for specific rooms "
+                    "in the format 'room_name,mail1&mail2;room_name2,mail1&mail2' (optional)")
+args = parser.parse_args()
 
 # load dormitory info
 print("loading dormitory info ...", end="", flush=True)
@@ -135,22 +140,21 @@ with open("dormitory_info.json", "rt", encoding="utf-8") as f:
     dormitory_info: dict = verbose_dict(json.load(f))
 print(" done")
 
-passphrase = sys.argv[2]
+passphrase = args.passphrase
 
-cookies = {k: v[0] for k, v in parse_qs(sys.argv[3]).items()}
+cookies = {k: v[0] for k, v in parse_qs(args.cookies).items()}
 
-mail_config["mail_user"] = sys.argv[4] if len(sys.argv) > 4 else ""
-mail_config["mail_pass"] = sys.argv[5] if len(sys.argv) > 5 else ""
+mail_config["mail_user"] = args.mail.split("&")[0] if args.mail else ""
+mail_config["mail_pass"] = args.mail.split("&")[1] if args.mail else ""
 mail_config["sender"] = mail_config["mail_user"]
 if mail_config["mail_user"] and mail_config["mail_pass"]:
     mail_config["mail_notify"] = True
-if len(sys.argv) > 6:
-    mail_config["force_notify"] = sys.argv[6].lower() in ("true", "1", "yes")
+mail_config["force_notify"] = args.mail.split("&")[2] in ["1", "true", "yes"] if len(args.mail.split("&")) > 2 else False
 
 receiver_dict = {}
-if len(sys.argv) > 7:
+if args.receivers:
     # room_name1,mail1&mail2;room_name2,mail1&mail2
-    receiver_list = sys.argv[7].split(";")
+    receiver_list = args.receivers.split(";")
     for name_and_mails in receiver_list:
         name, mails = name_and_mails.split(",", 1)
         mails = mails.split("&")
