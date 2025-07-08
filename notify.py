@@ -46,5 +46,6 @@ def mail_notification(mail_config, subject, body, image_paths=None):
         smtp_obj.sendmail(sender, receivers, message.as_string())
         smtp_obj.quit()
         return True
-    except smtplib.SMTPException:
+    except smtplib.SMTPException as e:
+        print(f"SMTP error occurred: {e}")
         return False

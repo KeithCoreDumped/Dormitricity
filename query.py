@@ -73,7 +73,7 @@ def do_query(query_str: str, q_passphrase: str, q_cookies: dict):
         room_id = dormitory_info[campus][partment]["floors"][floor][room]
     except bad_query as e:
         print(f"bad query: {e}")
-        exit(1)
+        sys.exit(1)
 
     # query the api
     print("querying ...", end="", flush=True)
@@ -105,12 +105,17 @@ def do_query(query_str: str, q_passphrase: str, q_cookies: dict):
 
     if (remain < 5 and mail_config["mail_notify"]) or mail_config["force_notify"]:
         mail_config["receivers"] = receiver_dict.get(room_name, [mail_config["sender"]])
-        notify.mail_notification(
+        ret = notify.mail_notification(
             mail_config=mail_config,
             subject=f"宿舍电量预警: {room_name}",
             body=f"当前电量: {remain}度\n时间: {time}" + "<img src='{img0}'><img src='{img1}'>",
             image_paths=[f"{cs.filepath}/recent.png", f"{cs.filepath}/watts.png"],
         )
+        if ret:
+            print(f"notification sent to {', '.join(mail_config['receivers'])}")
+        else:
+            raise RuntimeError(
+                f"failed to send notification to {', '.join(mail_config['receivers'])}")
 
 def show_help_exit():
     print("usage: dormitricity query -q 'campus.partment.floor.room@room_name' -p passphrase -c cookies [-m mail_address&mail_pass&smtp_host&force_notify] [-r room_name,mail1&mail2;room_name2,mail1&mail2]")
