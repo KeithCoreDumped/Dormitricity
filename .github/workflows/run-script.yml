@@ -42,7 +42,7 @@ jobs:
       run: pip install -r requirements.txt
 
     - name: Run log script
-      run: python query.py "${{ secrets.QUERY_STR }}" "${{ secrets.PASSPHRASE }}" "${{ secrets.COOKIES }}"
+      run: python query.py -q "${{ secrets.QUERY_STR }}" -p "${{ secrets.PASSPHRASE }}" -c "${{ secrets.COOKIES }}" -m "${{ secrets.MAIL }}" -r "${{ secrets.RECEIVER_LIST }}"
 
     - name: Commit and push log
       run: |
@@ -50,7 +50,7 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add .
-        git commit -m "Update logs"
-        git push
+        git commit -m "Update logs" --amend
+        git push -f
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

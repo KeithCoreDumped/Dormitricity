@@ -61,4 +61,18 @@ Dormitricity 是由 Python 构建的爬虫，运行在 GitHub Actions 上。它�
      ```
    - `PASSPHRASE`，按上述要求生成的随机字符串
 
+   - `MAIL`, 用于发送邮件通知的邮箱设置，格式为 `mail_address&mail_pass&smtp_host&force_notify`
+
+     - `mail_address`：发送邮件的邮箱地址
+     - `mail_pass`：发送邮件的邮箱密码
+     - `smtp_host`：SMTP 服务器地址，例如 `smtp.qq.com`
+     - `force_notify`：是否强制发送通知，值为 `1`、`true` 或 `yes` 时表示强制发送通知，否则不强制发送，一般不需要强制发送通知，仅用于测试。
+    
+    - `RECEIVER_LIST`，用于指定接收通知的邮箱列表，格式为 `room_name,mail1&mail2;room_name2,mail1&mail2`
+        - `room_name`：宿舍标识符，与查询字符串中的宿舍标识符相同
+        - `mail1&mail2`：接收通知的邮箱地址列表，多个邮箱地址用 `&` 分隔
+        - 不同宿舍的配置用 `;` 分隔
+    
+若不需要邮件通知功能，则可以不设置 `MAIL` 和 `RECEIVER_LIST`。
+
 ## 会因此被开盒吗？
