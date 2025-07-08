@@ -119,7 +119,7 @@ def do_query(query_str: str, q_passphrase: str, q_cookies: dict):
 
 def show_help_exit():
     print("usage: dormitricity query -q 'campus.partment.floor.room@room_name' -p passphrase -c cookies [-m mail_address&mail_pass&smtp_host&force_notify] [-r room_name,mail1&mail2;room_name2,mail1&mail2]")
-    print("example: dormitricity query -q '西土城.学五楼.3.5-312-节能蓝天@学五-312宿舍,沙河.沙河校区雁北园A楼.1层.A楼102@沙河A102宿舍' -p 'your_passphrase' -c 'UUKey=value1&eai-sess=value2' -m 'mail_address&mail_pass&smtp_host&1' -r '101,mail1&mail2;102,mail3'")
+    print("example: dormitricity query -q '西土城.学五楼.3.5-312-节能蓝天@学五-312宿舍,沙河.沙河校区雁北园A楼.1层.A楼102@沙河A102宿舍' -p 'your_passphrase' -c 'UUKey=value1&eai-sess=value2' -m 'mail_address&mail_pass&smtp_host&1' -r '学五-312宿舍,mail1&mail2;沙河A102宿舍,mail3'")
     sys.exit(1)
 
 # main logic
