@@ -115,7 +115,7 @@ def do_query(query_str: str, q_passphrase: str, q_cookies: dict):
 def show_help_exit():
     print("usage: dormitricity query -q 'campus.partment.floor.room@room_name' -p passphrase -c cookies [-m mail_address&mail_pass&smtp_host&force_notify] [-r room_name,mail1&mail2;room_name2,mail1&mail2]")
     print("example: dormitricity query -q '西土城.东区.1.101@101' -p 'your_passphrase' -c 'UUKey=value1&eai-sess=value2' -m 'mail_address&mail_pass&smtp_host&1' -r '101,mail1&mail2;102,mail3'")
-    exit(0)
+    sys.exit(1)
 
 # main logic
 
@@ -140,6 +140,7 @@ with open("dormitory_info.json", "rt", encoding="utf-8") as f:
     dormitory_info: dict = verbose_dict(json.load(f))
 print(" done")
 
+
 passphrase = args.passphrase
 
 cookies = {k: v[0] for k, v in parse_qs(args.cookies).items()}
@@ -161,6 +162,5 @@ if args.receivers:
         mails = mails.split("&")
         receiver_dict[name] = mails
 
-
-for qs in sys.argv[1].split(","):
+for qs in args.query.split(","):
     do_query(qs, passphrase, cookies)
