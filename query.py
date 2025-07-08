@@ -108,10 +108,10 @@ def do_query(query_str: str, q_passphrase: str, q_cookies: dict):
         ret = notify.mail_notification(
             mail_config=mail_config,
             subject=f"宿舍电量预警: {room_name}",
-            body=f"当前电量: {remain}度\n时间: {time}" + "<img src='{img0}'><img src='{img1}'>",
+            body=f"当前电量: {remain}度\n时间: {time}" + "<br/><img src='{img0}'><img src='{img1}'>",
             image_paths=[f"{cs.filepath}/recent.png", f"{cs.filepath}/watts.png"],
         )
-        if ret == False:
+        if ret is False:
             raise RuntimeError("failed to send notification")
 
 def show_help_exit():
