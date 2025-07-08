@@ -1,5 +1,5 @@
 import json, sys, argparse
-from datetime import datetime
+from datetime import datetime 
 from urllib.parse import parse_qs
 import requests
 from storage import csv_storage
@@ -101,9 +101,10 @@ def do_query(query_str: str, q_passphrase: str, q_cookies: dict):
     cs.append(f"{remain}, {time}, {datetime.now()}\n")
 
     print(f"successfully saved to {cs.filename}")
-    plot.plot(cs)
+    exhaust_time = plot.plot(cs)
+    time_diff = datetime.now() - exhaust_time
 
-    if (remain < 5 and mail_config["mail_notify"]) or mail_config["force_notify"]:
+    if ((time_diff.total_seconds() / 3600 < 24 and mail_config["mail_notify"]) or mail_config["force_notify"]):
         mail_config["receivers"] = receiver_dict.get(room_name, [mail_config["sender"]])
         ret = notify.mail_notification(
             mail_config=mail_config,

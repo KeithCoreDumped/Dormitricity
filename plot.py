@@ -197,7 +197,7 @@ def plot_history(
 def plot_exhaustion(
     history_decharged: list[tuple[float, dt.datetime, dt.datetime]],
     history_last: tuple[float, dt.datetime, dt.datetime],
-):
+) -> dt.datetime:
     tlast = history_last[1]
     for i, (v, tq, tr) in enumerate(history_decharged):
         if tlast - tq < estimate_timedelta:
@@ -225,16 +225,6 @@ def plot_exhaustion(
     ts_overflow = dt.datetime(3000, 1, 1, 0, 0, 0).timestamp() # 32503651200.0
     if slope == 0.0 or abs(exhaustion_x) > ts_overflow:
         print("low electricity usage")
-        return None
-        exhaustion_x = history_last[1] + warning_timedelta
-        exhaustion_y = slope * exhaustion_x.timestamp() + intercept
-        plt.text(
-            exhaustion_x,
-            exhaustion_y + 10,
-            f"no exhaustion\nuntil year 3000",
-            fontsize=10,
-            ha="center",
-        )
         return None
     print(f"slope={slope}, exhaustion={exhaustion_x}")
 
@@ -288,7 +278,7 @@ def plot_watts(history_decharged: list[tuple[float, dt.datetime, dt.datetime]]):
     watts = diffs / [x.total_seconds() for x in widths] * 3.6e6
     plt.bar(timestamps, watts, width=widths, align="edge", color="skyblue")
 
-def plot(cs: csv_storage):
+def plot(cs: csv_storage) -> dt.datetime:
     # history = [
     #     (10.0, dt.datetime(2024, 8, 8, 0, 0, 0), dt.datetime(2024, 8, 8, 23, 59, 59)),
     #     (8.0, dt.datetime(2024, 8, 9, 0, 0, 0), dt.datetime(2024, 8, 9, 23, 59, 59)),
@@ -338,3 +328,5 @@ def plot(cs: csv_storage):
     plt.savefig(f"{cs.filepath}/watts.png", format="png")
     # delete figure
     plt.clf()
+
+    return exhaust_time
