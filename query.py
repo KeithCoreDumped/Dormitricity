@@ -146,10 +146,11 @@ cookies = {k: v[0] for k, v in parse_qs(args.cookies).items()}
 
 mail_config["mail_user"] = args.mail.split("&")[0] if args.mail else ""
 mail_config["mail_pass"] = args.mail.split("&")[1] if args.mail else ""
+mail_config["mail_host"] = args.mail.split("&")[2] if args.mail else ""
 mail_config["sender"] = mail_config["mail_user"]
 if mail_config["mail_user"] and mail_config["mail_pass"]:
     mail_config["mail_notify"] = True
-mail_config["force_notify"] = args.mail.split("&")[2] in ["1", "true", "yes"] if len(args.mail.split("&")) > 2 else False
+mail_config["force_notify"] = args.mail.split("&")[3] in ["1", "true", "yes"] if args.mail else False
 
 receiver_dict = {}
 if args.receivers:
